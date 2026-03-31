@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gavrilo Mrzi Srbijavoz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --yellow: #FFD600;
+      --black: #0A0A0A;
+      --mid: #1C1C1C;
+      --border: #2A2A2A;
+      --text: #E8E8E8;
+      --dim: #666;
+      --red: #FF3B30;
+      --green: #30D158;
+      --blue: #3A9FD8;
+      --blue-dim: rgba(58, 159, 216, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--black);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* ── HEADER ── */
+    header {
+      width: 100%;
+      padding: 18px 20px 12px;
+      text-align: center;
+      border-bottom: 2px solid var(--border);
+      position: relative;
+    }
+
+    .info-btn {
+      position: absolute;
+      top: 18px; right: 16px;
+      background: transparent;
+      border: 1.5px solid var(--dim);
+      color: var(--dim);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+    .info-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+
+    .logo-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.2rem, 8vw, 4.5rem);
+      letter-spacing: 0.05em;
+      line-height: 1;
+      color: var(--yellow);
+      text-shadow: 4px 4px 0 #8B7500, 2px 2px 0 #8B7500;
+    }
+
+    .logo-sub {
+      font-size: 0.62rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-top: 5px;
+    }
+
+    .blink { animation: blink 1.2s step-end infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--mid);
+      border: 2px solid var(--border);
+      max-width: 460px;
+      width: 100%;
+      padding: 24px;
+      position: relative;
+      animation: slideUp 0.2s ease;
+    }
+    .modal::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px;
+      width: 20px; height: 20px;
+      border-top: 2px solid var(--yellow);
+      border-left: 2px solid var(--yellow);
+    }
+    .modal::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; right: -2px;
+      width: 20px; height: 20px;
+      border-bottom: 2px solid var(--yellow);
+      border-right: 2px solid var(--yellow);
+    }
+
+    .modal-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.9rem;
+      color: var(--yellow);
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+
+    .modal-body {
+      font-size: 0.71rem;
+      line-height: 1.95;
+      color: var(--text);
+      letter-spacing: 0.04em;
+    }
+    .modal-body p { margin-bottom: 10px; }
+    .modal-body .warn { color: var(--red); }
+    .modal-body .acc { color: var(--yellow); }
+    .modal-body .muted { color: var(--dim); font-size: 0.63rem; }
+
+    .modal-close {
+      margin-top: 20px;
+      width: 100%;
+      background: transparent;
+      border: 1.5px solid var(--dim);
+      color: var(--dim);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      padding: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      outline: none;
+    }
+    .modal-close:hover { border-color: var(--yellow); color: var(--yellow); }
+
+    /* ── CLOCK ── */
+    .clock-section {
+      width: 100%;
+      max-width: 500px;
+      padding: 22px 20px 0;
+      text-align: center;
+    }
+
+    .current-time {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(5rem, 24vw, 9rem);
+      letter-spacing: 0.06em;
+      color: var(--text);
+      line-height: 1;
+      text-shadow: 0 0 60px rgba(255,255,255,0.08);
+    }
+
+    .current-date {
+      font-size: 0.68rem;
+      color: var(--dim);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* ── BUTTON ── */
+    .btn-container {
+      width: 100%;
+      max-width: 500px;
+      padding: 24px 20px;
+    }
+
+    .btn-main {
+      width: 100%;
+      background: var(--yellow);
+      color: var(--black);
+      border: none;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 8vw, 3.2rem);
+      letter-spacing: 0.1em;
+      padding: 22px 56px 18px 20px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.08s, box-shadow 0.08s;
+      box-shadow: 6px 6px 0 #8B7500;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      text-align: left;
+    }
+    .btn-main:hover { transform: translate(-2px,-2px); box-shadow: 8px 8px 0 #8B7500; }
+    .btn-main:active { transform: translate(4px,4px); box-shadow: 2px 2px 0 #8B7500; }
+    .btn-main::after {
+      content: '🚂';
+      font-size: 1.5rem;
+      position: absolute;
+      right: 18px; top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* ── RESULTS ── */
+    .result-container {
+      width: 100%;
+      max-width: 500px;
+      padding: 0 20px 20px;
+      display: none;
+    }
+    .result-container.visible { display: block; animation: slideUp 0.3s ease; }
+
+    @keyframes slideUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .weekend-warning {
+      background: rgba(255,59,48,0.1);
+      border: 1px solid var(--red);
+      padding: 12px 16px;
+      font-size: 0.72rem;
+      color: var(--red);
+      letter-spacing: 0.04em;
+      line-height: 1.7;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .weekend-warning.visible { display: block; }
+
+    .result-card {
+      background: var(--mid);
+      border: 2px solid var(--border);
+      padding: 20px;
+      position: relative;
+    }
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px;
+      width: 16px; height: 16px;
+      border-top: 2px solid var(--yellow);
+      border-left: 2px solid var(--yellow);
+    }
+    .result-card::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; right: -2px;
+      width: 16px; height: 16px;
+      border-bottom: 2px solid var(--yellow);
+      border-right: 2px solid var(--yellow);
+    }
+
+    .result-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 8px;
+    }
+
+    .next-train-time {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 14vw, 6rem);
+      letter-spacing: 0.05em;
+      line-height: 1;
+      color: var(--yellow);
+    }
+
+    .wait-line { font-size: 0.83rem; color: var(--dim); margin-top: 6px; }
+    .wait-line span { color: var(--text); font-weight: 700; }
+
+    .destination-badge {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 6px 14px;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 700;
+      border: 1.5px solid;
+    }
+    .dest-batajnica { color: var(--green); border-color: var(--green); background: rgba(48,209,88,0.08); }
+    .dest-resnik    { color: var(--blue);  border-color: var(--blue);  background: var(--blue-dim); }
+
+    .route-line { font-size: 0.7rem; color: var(--dim); margin-top: 10px; }
+    .route-line .sta { color: var(--text); }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+    .next-up-label { font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+
+    .train-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .train-row:last-child { border-bottom: none; }
+    .train-time-sm { font-family: 'Bebas Neue', sans-serif; font-size: 1.55rem; letter-spacing: 0.05em; color: var(--text); opacity: 0.55; }
+    .train-dest-sm { font-size: 0.63rem; letter-spacing: 0.14em; text-transform: uppercase; }
+    .dest-b { color: var(--green); }
+    .dest-r { color: var(--blue); }
+    .train-wait-sm { font-size: 0.65rem; color: var(--dim); text-align: right; }
+
+    .no-trains { text-align: center; padding: 28px 0; color: var(--dim); font-size: 0.78rem; letter-spacing: 0.08em; line-height: 1.9; }
+    .no-trains .emoji { font-size: 2.5rem; display: block; margin-bottom: 10px; }
+
+    /* ── QUOTE ── */
+    .quote-strip {
+      width: 100%;
+      max-width: 500px;
+      padding: 0 20px;
+      margin-bottom: 4px;
+    }
+    .quote-inner {
+      padding: 14px 18px;
+      background: var(--mid);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--yellow);
+    }
+    .quote-ref {
+      font-size: 0.58rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      display: block;
+      margin-bottom: 5px;
+    }
+    .quote-text {
+      font-size: 0.7rem;
+      color: var(--text);
+      font-style: italic;
+      line-height: 1.7;
+      letter-spacing: 0.03em;
+      opacity: 0.85;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 12px 20px 20px;
+      text-align: center;
+      font-size: 0.5rem;
+      color: var(--dim);
+      letter-spacing: 0.15em;
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title">O APLIKACIJI</div>
+    <div class="modal-body">
+      <p>Ova aplikacija nastala je iz <span class="warn">čistog gneva prema SrbijaVozu</span>.</p>
+      <p>Namenjena je <span class="acc">isključivo putnicima koji polaze sa stanice Krnjača Most</span> u smeru Vukov Spomenik.</p>
+      <p>Aplikacija uzima u obzir da <span class="acc">vikendom i praznicima važi drugačiji red vožnje</span> — određeni polasci ka Batajnici tada ne saobraćaju (zelena polja u zvaničnoj tabeli).</p>
+      <p>Vozovi ka Resniku i Lazarevcu saobraćaju <span class="acc">svaki dan</span> bez izuzetaka.</p>
+      <p class="warn">⚠ Gavrilo nije odgovoran ako voz ne dođe.<br>Za to su isključivo odgovorni idioti iz SrbijaVoz-a.</p>
+      <p class="muted">Red vožnje 2025/2026 · Važi od 18.02.2026. do 12.12.2026.</p>
+    </div>
+    <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('open')">ZATVORI ✕</button>
+  </div>
+</div>
+
+<header>
+  <button class="info-btn" onclick="document.getElementById('modalOverlay').classList.add('open')">? INFO</button>
+  <div class="logo-text">GAVRILO<br>MRZI SRBIJAVOZ</div>
+  <div class="logo-sub">Krnjača Most → Vukov Spomenik <span class="blink">|</span></div>
+</header>
+
+<div class="clock-section">
+  <div class="current-time" id="clock">--:--</div>
+  <div class="current-date" id="dateDisplay">---</div>
+</div>
+
+<div class="btn-container">
+  <button class="btn-main" onclick="checkNextTrain()">KADA ĆE VOZ?</button>
+</div>
+
+<div class="result-container" id="resultContainer">
+  <div class="weekend-warning" id="weekendWarning"></div>
+  <div class="result-card" id="resultCard"></div>
+</div>
+
+<div class="quote-strip">
+  <div class="quote-inner">
+    <span class="quote-ref" id="quoteRef">CITAT DANA</span>
+    <span class="quote-text" id="quoteText">···</span>
+  </div>
+</div>
+
+<footer>RED VOŽNJE 2025/2026 &nbsp;·&nbsp; VAŽI OD 18.02.2026. DO 12.12.2026.</footer>
+
+<script>
+
+// ── TIMETABLE ──────────────────────────────────────────────
+
+const BATAJNICA_TRAINS = [
+  { time: "05:50", weekendOff: true  },
+  { time: "06:20", weekendOff: false },
+  { time: "06:50", weekendOff: true  },
+  { time: "07:20", weekendOff: false },
+  { time: "07:50", weekendOff: true  },
+  { time: "08:20", weekendOff: false },
+  { time: "08:50", weekendOff: true  },
+  { time: "09:20", weekendOff: false },
+  { time: "10:00", weekendOff: false },
+  { time: "11:00", weekendOff: false },
+  { time: "11:30", weekendOff: true  },
+  { time: "12:20", weekendOff: false },
+  { time: "13:20", weekendOff: false },
+  { time: "14:00", weekendOff: false },
+  { time: "14:50", weekendOff: true  },
+  { time: "15:20", weekendOff: false },
+  { time: "15:50", weekendOff: true  },
+  { time: "16:30", weekendOff: false },
+  { time: "16:50", weekendOff: true  },
+  { time: "17:20", weekendOff: false },
+  { time: "18:00", weekendOff: false },
+  { time: "18:50", weekendOff: true  },
+  { time: "19:20", weekendOff: false },
+  { time: "19:50", weekendOff: false },
+  { time: "20:30", weekendOff: true  },
+  { time: "21:20", weekendOff: false },
+  { time: "22:45", weekendOff: false },
+];
+
+const RESNIK_TRAINS = [
+  "06:00","06:30","07:45","07:57","08:30","09:28",
+  "10:45","12:00","12:50","13:35","14:05","14:30",
+  "15:10","15:32","16:02","16:40","17:40","18:20",
+  "18:40","19:10","20:00","20:40","22:10","22:45"
+];
+
+const PUBLIC_HOLIDAYS = [
+  "2026-01-01","2026-01-02","2026-01-07",
+  "2026-02-15","2026-02-16","2026-02-17",
+  "2026-04-10","2026-04-12","2026-04-13",
+  "2026-05-01","2026-05-02","2026-11-11"
+];
+
+// ── CITATI ─────────────────────────────────────────────────
+
+const QUOTES = [
+  { ref: "Psalam 23:1", text: "Gospod je pastir moj, ništa mi neće nedostajati." },
+  { ref: "Filipljanima 4:13", text: "Sve mogu u onome koji me osnažuje." },
+  { ref: "Rimljanima 8:28", text: "Znamo da Bog sve vodi na dobro onima koji ga ljube." },
+  { ref: "Jovan 3:16", text: "Bog je toliko ljubio svet da je dao svog jedinorođenog Sina." },
+  { ref: "Isaija 41:10", text: "Ne boj se, jer sam s tobom; ne plaši se, jer sam Bog tvoj." },
+  { ref: "Psalam 46:1", text: "Bog je utočište i snaga, pomoćnik u nevolji uvek spreman." },
+  { ref: "Matej 6:33", text: "Tražite najpre carstvo Božje i pravdu njegovu, i sve će vam se dodati." },
+  { ref: "Jakov 1:5", text: "Ako kome nedostaje mudrosti, neka moli Boga, koji svima daje velikodušno." },
+  { ref: "Rimljanima 12:2", text: "Ne prilagođavajte se ovom svetu, nego se obnavljajte umom svojim." },
+  { ref: "Psalam 118:24", text: "Ovo je dan koji je Gospod učinio; radujmo se i veselimo se njemu." },
+  { ref: "Jeremija 29:11", text: "Jer ja znam planove koje imam za vas – planove mira, a ne nesreće." },
+  { ref: "Filipljanima 4:6", text: "Ne brinite se ni za što, nego u svemu molitvom i zahvalnošću iznesite svoje molbe Bogu." },
+  { ref: "Matej 7:7", text: "Tražite i daće vam se; kucajte i otvoriće vam se." },
+  { ref: "Psalam 37:4", text: "Uživaj u Gospodu i daće ti srca tvoja što želi." },
+  { ref: "1. Korinćanima 13:4", text: "Ljubav je strpljiva, ljubav je dobrostiva; ne zavidi, ne hvasta se." },
+  { ref: "Psalam 34:18", text: "Blizu je Gospod onima koji su slomljena srca." },
+  { ref: "Isaija 40:31", text: "Ali oni koji čekaju Gospoda dobijaju novu snagu, lete kao orlovi." },
+  { ref: "1. Petrova 5:7", text: "Sve svoje brige bacite na njega, jer mu je stalo do vas." },
+  { ref: "Psalam 121:1-2", text: "Podižem oči ka planinama – odakle će mi pomoć doći? Pomoć mi dolazi od Gospoda." },
+  { ref: "Rimljanima 5:8", text: "Bog pokazuje svoju ljubav prema nama time što je Hrist umro za nas dok smo još bili grešnici." },
+  { ref: "Matej 11:28", text: "Dođite k meni svi koji ste umorni i opterećeni, i ja ću vas odmoriti." },
+  { ref: "1. Jovanova 4:18", text: "U ljubavi nema straha, jer savršena ljubav izbacuje strah." },
+  { ref: "Efescima 6:10", text: "Na kraju, budite jaki u Gospodu i u njegovoj sili." },
+  { ref: "Psalam 27:1", text: "Gospod je svetlost moja i spasenje moje – koga da se bojim?" },
+  { ref: "Proverbi 3:5-6", text: "Uzdaj se u Gospoda svim srcem svojim, i ne oslanjaj se na svoj razum." },
+  { ref: "Psalam 91:1-2", text: "Koji živi u zaklonu Višnjeg, u senci Svemogućeg počiva." },
+  { ref: "Matej 5:16", text: "Neka vaša svetlost sija pred ljudima, da vide vaša dobra dela i slave Oca vašeg." },
+  { ref: "2. Korinćanima 5:7", text: "Jer mi hodimo verom, a ne videći." },
+  { ref: "Psalam 19:14", text: "Neka reči usta mojih i meditacije srca mog budu ugodne pred tobom, Gospode." },
+  { ref: "Hebrejima 11:1", text: "Vera je pouzdanje u ono čemu se nadamo i uverenje u ono što ne vidimo." },
+  { ref: "Luka 1:37", text: "Za Boga ništa nije nemoguće." },
+  { ref: "Matej 19:26", text: "Za ljude je nemoguće, ali za Boga je sve moguće." },
+  { ref: "Psalam 37:5", text: "Predaj Gospodu putove svoje i uzdaj se u njega – on će delovati." },
+  { ref: "Rimljanima 15:13", text: "Bog neka vas ispuni svakom radošću i mirom u veri." },
+  { ref: "2. Timoteju 1:7", text: "Bog nam nije dao duha straha, nego moći, ljubavi i razuma." },
+  { ref: "Psalam 56:3", text: "Kad se bojim, uzdam se u tebe." },
+  { ref: "Isaija 43:2", text: "Kad prođeš kroz vode, ja ću biti s tobom; kroz reke, neće te potopiti." },
+  { ref: "Jovan 14:6", text: "Ja sam put, istina i život; niko ne dolazi Ocu osim kroz mene." },
+  { ref: "Psalam 103:12", text: "Koliko je istok daleko od zapada, toliko udaljava od nas naše bezakonje." },
+  { ref: "1. Jovanova 1:9", text: "Ako priznamo grehe svoje, veran je i pravedan da nam oprosti i očisti nas od svake nepravde." },
+  { ref: "Filipljanima 4:19", text: "Bog će po svom bogatstvu u Hristu Isusu zadovoljiti sve vaše potrebe." },
+  { ref: "Psalam 32:8", text: "Poučiću te i pokazati ti put koji treba da ideš; oko moje nad tobom." },
+  { ref: "Matej 6:34", text: "Ne brinite se za sutra; sutra će brinuti za sebe." },
+  { ref: "Isaija 26:3", text: "Onome koji je ustrajan u misli, čuvaš savršeni mir." },
+  { ref: "Psalam 37:7", text: "Budi miran pred Gospodom i strpljivo čekaj na njega." },
+  { ref: "Rimljanima 8:31", text: "Ako je Bog za nas, ko će protiv nas?" },
+  { ref: "2. Korinćanima 12:9", text: "Moja milost ti je dovoljna, jer snaga se u slabosti pokazuje savršeno." },
+  { ref: "Psalam 40:1", text: "Čekao sam Gospoda; On se nagnuo k meni i poslušao moj vapaj." },
+  { ref: "Luka 6:31", text: "Što hoćeš da ljudi čine tebi, čini i ti njima." },
+  { ref: "Psalam 119:105", text: "Reč tvoja je svetiljka za stopala moja i svetlo na stazi mojoj." },
+  { ref: "Jeremija 33:3", text: "Zovite me i ja ću vam odgovoriti i pokazati vam velika i skrivena dela." },
+  { ref: "Psalam 73:26", text: "Bog je snaga srca mog i deo moj na vekove." },
+  { ref: "Jovan 8:12", text: "Ja sam svetlost sveta; ko ide za mnom, neće hodati u tami." },
+  { ref: "Rimljanima 6:23", text: "Plaća greha je smrt, a dar Božiji je život večni u Hristu Isusu." },
+  { ref: "Psalam 91:11", text: "Anđelima svojim naredi za tebe da te čuvaju na svim putovima tvojim." },
+  { ref: "Proverbi 16:3", text: "Predaj Gospodu dela svoja i tvoje planove će biti uspešni." },
+  { ref: "1. Korinćanima 10:13", text: "Bog neće dozvoliti da budete iskušani preko snage svoje; daće i izlaz." },
+  { ref: "Psalam 121:7-8", text: "Gospod čuva tvoje išla i dolazak sada i doveka." },
+  { ref: "Efescima 2:8-9", text: "Po milosti ste spašeni kroz veru; to nije od vas, Božiji dar je." },
+  { ref: "Psalam 18:2", text: "Gospod je stena moja, tvrđava i spasilac moj." },
+  { ref: "Isaija 54:17", text: "Nijedno oružje koje se protiv tebe stvara neće uspevati." },
+  { ref: "Matej 28:20", text: "I gle, ja sam s vama svakoga dana do svršetka sveta." },
+  { ref: "Psalam 34:8", text: "Okusite i vidite da je Gospod dobar; blagosloven čovek koji u njemu se skriva." },
+  { ref: "Jovan 15:13", text: "Veće ljubavi niko nema nego što da život svoj za prijatelje svoje." },
+  { ref: "Proverbi 4:23", text: "Čuvaj srce svoje više nego sve drugo; iz njega izvire život." },
+  { ref: "Isaija 12:2", text: "Gospod je Bog moj, uzdam se u njega i ne bojim se." },
+  { ref: "Rimljanima 8:39", text: "Ništa ne može odvojiti nas od ljubavi Božje u Hristu Isusu." },
+  { ref: "Psalam 46:10", text: "Budite mirni i znajte da sam ja Bog." },
+  { ref: "Matej 5:9", text: "Blagosloveni mirotvorci, jer će se zvati sinovi Božiji." },
+  { ref: "2. Timoteju 3:16", text: "Sva Pisma su Bogom nadahnuta i korisna za pouku, krivicu, ispravku i učenje u pravdi." },
+  { ref: "Psalam 27:14", text: "Čekaj Gospoda; budi hrabar i neka ti srce bude čvrsto." },
+  { ref: "Psalam 119:11", text: "U srcu svom čuvam reč tvoju da ne sagrešim protiv tebe." },
+  { ref: "Jovan 16:33", text: "U svetu ćete imati nevolju; ali budite hrabri, ja sam pobedio svet." },
+  { ref: "Hebrejima 13:5", text: "Ne budite pohlepni; zadovoljni budite onim što imate, jer Bog reče: Neću te ostaviti." },
+  { ref: "Psalam 62:1-2", text: "Moja duša se smiruje samo u Bogu; spasenje moje dolazi od njega." },
+  { ref: "Filipljanima 1:6", text: "Onaj koji je počeo dobro delo u vama, izvršiće ga do dana Hrista Isusa." },
+  { ref: "Rimljanima 12:12", text: "Radujte se u nadi, budite strpljivi u nevolji, u molitvi postojani." },
+  { ref: "Psalam 37:23-24", text: "Gospod usmerava korake čoveka; i ako padne, neće biti oboren." },
+  { ref: "1. Jovanova 5:14", text: "Ako tražimo nešto po volji njegovoj, on nas sluša." },
+  { ref: "Psalam 119:50", text: "Ovo je uteha moja u nevolji: tvoja reč me osnažuje." },
+  { ref: "Matej 5:6", text: "Blagosloveni gladni i žedni pravednosti, jer će se nasititi." },
+  { ref: "Rimljanima 8:1", text: "Nema više osude za one koji su u Hristu Isusu." },
+  { ref: "Psalam 19:7", text: "Zakon Gospodnji je savršen, dušu osvežava." },
+  { ref: "Jakov 4:7", text: "Pokorite se Bogu, a protivite se đavolu i on će pobeći od vas." },
+  { ref: "Luka 18:27", text: "Što je nemoguće ljudima, moguće je Bogu." },
+  { ref: "Psalam 145:18", text: "Blizak je Gospod svima koji ga zazivaju, svim koji ga zazivaju u istini." },
+  { ref: "1. Korinćanima 15:58", text: "Budite postojani, radite u Gospodu uvek." },
+  { ref: "Psalam 31:24", text: "Budite jaki i srce vaše nek bude hrabro, svi koji se uzdaju u Gospoda." },
+  { ref: "Efescima 3:20", text: "On može da učini daleko više nego što tražimo ili mislimo po sili koja deluje u nama." },
+  { ref: "Psalam 33:20-22", text: "Duša naša se uzda u Gospoda; On je pomoć i štit naš." },
+  { ref: "Jovan 10:10", text: "Ja sam došao da imaju život, i to u izobilju." },
+  { ref: "Psalam 62:5", text: "Duša moja, samo u Bogu mir pronađi." },
+  { ref: "Proverbi 3:7", text: "Ne budi mudar u očima svojim; boj se Gospoda i kloni se zla." },
+  { ref: "Isaija 30:21", text: "Kad skreneš levo ili desno, tvoje uši će čuti glas iza tebe: Ovo je put, idi tim putem." },
+  { ref: "Psalam 50:15", text: "Zovi me u nevolji svojoj i izbaviću te." },
+  { ref: "Matej 22:37-39", text: "Ljubite Gospoda Boga svog svim srcem, i bližnjeg svog kao sebe." },
+  { ref: "Rimljanima 13:10", text: "Ljubav ne čini bližnjemu ništa loše; ljubav je ispunjenje zakona." },
+  { ref: "Psalam 136:1", text: "Hvalite Gospoda, jer je dobar; jer njegova milost je doveka." },
+  { ref: "Psalam 37:31", text: "Zakon njegov u srcu njihovom; koraci njihovi ne posrću." },
+  { ref: "Psalam 62:5", text: "Duša moja, samo u Bogu mir pronađi." },
+];
+
+const WEEKEND_MSGS = [
+  "🛋️ Vikend je — ne žuri ni Gavrilo. Deo vozova ka Batajnici ima slobodan dan.",
+  "😴 Subota/Nedelja. SrbijaVoz odmara. Deo polazaka ka Batajnici otišao kući.",
+  "☕ Vikend red vožnje. Manje Batajnica vozova, ista količina strpljenja.",
+  "🥱 Vikend. Gavrilo razume. SrbijaVoz manje vozi ka Batajnici — ostali polasci idu.",
+  "🎉 Vikend! Gavrilo preporučuje da se ne žuri. Deo Batajnica vozova se slaže.",
+];
+
+const HOLIDAY_MSGS = [
+  "🎊 Državni praznik. SrbijaVoz slavi tako što ne vozi neke polaske ka Batajnici.",
+  "🕯️ Praznik je. Deo Batajnica vozova ima slobodan dan — Resnik vozi normalno.",
+  "🏳️ Državni praznik. Gavrilo ti želi lepo slavlje i strpljenje na peronu.",
+];
+
+// ── HELPERS ────────────────────────────────────────────────
+
+function isHoliday(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth()+1).padStart(2,'0');
+  const d = String(date.getDate()).padStart(2,'0');
+  return PUBLIC_HOLIDAYS.includes(`${y}-${m}-${d}`);
+}
+
+function isWeekend(date) {
+  const d = date.getDay();
+  return d === 0 || d === 6;
+}
+
+function timeToMinutes(t) {
+  const [h,m] = t.split(':').map(Number);
+  return h*60+m;
+}
+
+function minutesToTime(mins) {
+  const h = Math.floor(mins/60)%24, m = mins%60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+
+function formatWait(mins) {
+  if (mins < 1) return 'odmah!';
+  if (mins === 1) return 'za 1 minut';
+  if (mins < 60) return `za ${mins} min`;
+  const h = Math.floor(mins/60), m = mins%60;
+  return m === 0 ? `za ${h}h` : `za ${h}h ${m}min`;
+}
+
+function getDayName(date) {
+  return ['nedelja','ponedeljak','utorak','sreda','četvrtak','petak','subota'][date.getDay()];
+}
+
+function getMonthName(date) {
+  return ['januar','februar','mart','april','maj','jun','jul','avgust','septembar','oktobar','novembar','decembar'][date.getMonth()];
+}
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// ── QUOTE ──────────────────────────────────────────────────
+
+function loadQuote() {
+  const now = new Date();
+  const seed = now.getFullYear()*10000 + (now.getMonth()+1)*100 + now.getDate();
+  const q = QUOTES[seed % QUOTES.length];
+  document.getElementById('quoteRef').textContent = q.ref;
+  document.getElementById('quoteText').textContent = '\u201E' + q.text + '\u201C';
+}
+
+// ── CLOCK ──────────────────────────────────────────────────
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  document.getElementById('dateDisplay').textContent =
+    `${getDayName(now)}, ${now.getDate()}. ${getMonthName(now)} ${now.getFullYear()}.`;
+}
+
+// ── MAIN ───────────────────────────────────────────────────
+
+function checkNextTrain() {
+  const now = new Date();
+  const currentMins = now.getHours()*60 + now.getMinutes();
+  const restricted = isWeekend(now) || isHoliday(now);
+  const holiday = isHoliday(now);
+
+  const warning = document.getElementById('weekendWarning');
+  if (restricted) {
+    warning.textContent = holiday ? pickRandom(HOLIDAY_MSGS) : pickRandom(WEEKEND_MSGS);
+    warning.classList.add('visible');
+  } else {
+    warning.classList.remove('visible');
+  }
+
+  let allTrains = [];
+  BATAJNICA_TRAINS.forEach(t => {
+    if (restricted && t.weekendOff) return;
+    allTrains.push({ time: t.time, dest: 'B', mins: timeToMinutes(t.time) });
+  });
+  RESNIK_TRAINS.forEach(t => allTrains.push({ time: t, dest: 'R', mins: timeToMinutes(t) }));
+  allTrains.sort((a,b) => a.mins - b.mins);
+
+  const upcoming = allTrains.filter(t => t.mins >= currentMins);
+  const container = document.getElementById('resultContainer');
+  const card = document.getElementById('resultCard');
+  container.classList.add('visible');
+
+  if (upcoming.length === 0) {
+    card.innerHTML = `
+      <div class="no-trains">
+        <span class="emoji">🌙</span>
+        NEMA VIŠE VOZOVA DANAS<br>
+        <span style="color:var(--text);display:block;margin-top:8px;">Zadnji voz je otišao.<br>Gavrilo predlaže taksi.</span>
+      </div>`;
+    return;
+  }
+
+  const next = upcoming[0];
+  const waitMins = next.mins - currentMins;
+  const destLabel = next.dest === 'B' ? 'BATAJNICA' : 'RESNIK / LAZAREVAC';
+  const destClass = next.dest === 'B' ? 'dest-batajnica' : 'dest-resnik';
+  const vukovTime = minutesToTime(next.mins + 9);
+  const nextFew = upcoming.slice(1, 5);
+
+  let nextFewHTML = '';
+  nextFew.forEach(t => {
+    const w = t.mins - currentMins;
+    nextFewHTML += `
+      <div class="train-row">
+        <div class="train-time-sm">${t.time}</div>
+        <div class="train-dest-sm ${t.dest==='B' ? 'dest-b' : 'dest-r'}">→ ${t.dest==='B' ? 'Batajnica' : 'Resnik'}</div>
+        <div class="train-wait-sm">${formatWait(w)}</div>
+      </div>`;
+  });
+
+  card.innerHTML = `
+    <div class="result-label">SLEDEĆI VOZ — KRNJAČA MOST</div>
+    <div class="next-train-time">${next.time}</div>
+    <div class="wait-line">polazi <span>${formatWait(waitMins)}</span> · Vukov ~<span>${vukovTime}</span></div>
+    <div><span class="destination-badge ${destClass}">→ ${destLabel}</span></div>
+    <div class="route-line" style="margin-top:12px;">
+      <span class="sta">Krnjača Most</span> → Pančevački Most → Vukov Spom.
+    </div>
+    ${nextFew.length > 0 ? `
+      <hr class="divider">
+      <div class="next-up-label">NAREDNI VOZOVI</div>
+      ${nextFewHTML}` : ''}
+  `;
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// ── INIT ───────────────────────────────────────────────────
+updateClock();
+setInterval(updateClock, 10000);
+loadQuote();
+
+</script>
+</body>
+</html>
